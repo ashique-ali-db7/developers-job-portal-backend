@@ -9,9 +9,28 @@ const sendEmail = require('../utils/sendEmail');
 const nodemailer = require('nodemailer');
 const env = require('../config/env');
 const { response } = require('express');
+const { jwt_secert } = require('../config/env');
+const jwt = require("jsonwebtoken");
  
+function authenthicateToken(req,res,next){
+
+    const authHeader = req.headers['authorization']
+
+     const token = authHeader && authHeader.split(' ')[1]       // Bearer TOKEN     bearer is a token format
+
+     if(token == null) return res.sendStatus(401)
+
+    jwt.verify(token,env.jwt_secert,(err,userid)=>{
+if(err) return res.sendStatus(403)
+req.userId = userid
+next()
+    })
+}
 
 
+
+
+let currenetUserEmail = ""
 
 
 
@@ -25,10 +44,10 @@ router.route('/')
 
 router.route('/signup')
 .post((req,res)=>{
-   
+    currenetUserEmail = req.body.email;
     userHelpers.userSignupVerification(req.body).then((response)=>{
-    if(response.exist){
-        console.log("idh scene");
+    if(response.emailExist){
+       
         res.status(409);
         res.json({message:"Entered user already exist"})
        
@@ -57,22 +76,53 @@ router.route('/signup')
     transporter.sendMail(mailOptions,function(err,data){
         if(err){
             console.log('error occurs'+err);
+          
+            res.status(400);
+            res.json({message:"Invalid Email address"})
+            
         }else{
+            res.status(200);
+            res.json({message:"Email send succesfulyy"})
+            
             console.log('email sent');
+           
         }
     })
-
-res.status(200);
-
 
     }
 })
 
+})
+
+
+router.route('/otpVerification')
+.post((req,res)=>{
   
+ userHelpers.otpVerification(req.body,currenetUserEmail).then((response)=>{
+     if(response.verification){
+         res.status(200);
+         res.json({message:"otp is correct"})
+     }else{
+         res.status(400);
+         res.json({message:"otp is not correct"});
+     }
+ })
+})
 
 
+router.route('/signin')
+.post((req,res)=>{
+   userHelpers.siginCheck(req.body).then((response)=>{
+       if(response.exist){
+           res.status(200);
+           res.json({token:response.token})
 
-
+       }else{
+           res.status(404);
+           res.json({message:"Invalid user name or password"})
+           
+       }
+   })
 })
 
 
