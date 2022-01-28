@@ -115,7 +115,7 @@ router.route('/signin')
    userHelpers.siginCheck(req.body).then((response)=>{
        if(response.exist){
            res.status(200);
-           res.json({token:response.token})
+           res.json({token:response.token,user:response.user})
 
        }else{
            res.status(404);
