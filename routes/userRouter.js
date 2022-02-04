@@ -5,18 +5,18 @@ const adminHelpers = require("../helpers/adminHelper");
 const asyncHandler = require("express-async-handler");
 const generateToken = require("../utils/generateToken");
 const sendEmail = require("../utils/sendEmail");
-const superagent = require('superagent');
+const superagent = require("superagent");
 const nodemailer = require("nodemailer");
 const env = require("../config/env");
 const { response } = require("express");
 const { jwt_secert } = require("../config/env");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
-const GitHubStrategy = require('passport-github').Strategy;
+const GitHubStrategy = require("passport-github").Strategy;
+const multer  = require('multer')
+const upload = multer({ dest: 'uploads/' })
+
 let currenetUserEmail = "";
-
-
-
 
 function authenthicateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
@@ -32,15 +32,9 @@ function authenthicateToken(req, res, next) {
   });
 }
 
-
-
-
-
-
 router.route("/").get((req, res) => {});
 
 router.route("/signup").post((req, res) => {
-  
   currenetUserEmail = req.body.email;
   userHelpers.userSignupVerification(req.body).then((response) => {
     if (response.emailExist) {
@@ -93,7 +87,6 @@ router.route("/otpVerification").post((req, res) => {
 
 router.route("/signin").post((req, res) => {
   userHelpers.siginCheck(req.body).then((response) => {
-     
     if (response.exist) {
       res.status(200);
       res.json({ token: response.token, user: response.user });
@@ -104,21 +97,21 @@ router.route("/signin").post((req, res) => {
   });
 });
 
-router.route('/googleVerification').post((req,res)=>{
-  let {email} = req.body
- userHelpers.googleVerification(email).then((response)=>{
-  if(response.exist){
-  res.status(200);
-  res.json({token: response.token,user:response.user})
-  }else{
-   res.status(401);
-   res.json({message:"user does not exist"});
-  }
+router.route("/googleVerification").post((req, res) => {
+  let { email } = req.body;
+  userHelpers.googleVerification(email).then((response) => {
+    if (response.exist) {
+      res.status(200);
+      res.json({ token: response.token, user: response.user });
+    } else {
+      res.status(401);
+      res.json({ message: "user does not exist" });
+    }
+  });
+});
 
- })
- 
-  
-
+router.route('/profilePost').post(upload.single('avatar'),(req,res)=>{
+console.log(req.body);
 })
 
 module.exports = router;
