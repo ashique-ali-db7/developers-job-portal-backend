@@ -13,8 +13,9 @@ const { jwt_secert } = require("../config/env");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const GitHubStrategy = require("passport-github").Strategy;
-const multer  = require('multer')
-const upload = multer({ dest: 'uploads/' })
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
+
 
 let currenetUserEmail = "";
 
@@ -110,8 +111,9 @@ router.route("/googleVerification").post((req, res) => {
   });
 });
 
-router.route('/profilePost').post(upload.single('avatar'),(req,res)=>{
-console.log(req.body);
+router.post('/profilePost',upload.single('verificationResulToBackend','profileResulToBackend'),(req,res)=>{
+  console.log(req.body);
+  console.log(req.file)
 })
 
 module.exports = router;
