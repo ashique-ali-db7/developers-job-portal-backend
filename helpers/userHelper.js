@@ -117,4 +117,18 @@ module.exports = {
       }
     });
   },
+  uploadProfile: (allData, imgUrl) => {
+    allData.profileImage = imgUrl;
+    console.log(allData);
+    console.log("jjjj");
+    return new Promise((resolve,reject)=>{
+      console.log("kkkk");
+      db.get().collection(collections.USERS_DETAILS_COLLECTION).updateOne({_id:objectId(allData.userId)},{$set:{...allData}});
+    })
+  },
+  uploadVerificationImage:(allData,imgUrl) =>{
+    return new Promise((resolve,reject)=>{
+      db.get().collection(collections.USERS_DETAILS_COLLECTION).updateOne({_id:objectId(allData.userId)},{$set:{verificationImageUrl:imgUrl}})
+    })
+  }
 };

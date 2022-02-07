@@ -15,7 +15,7 @@ const passport = require("passport");
 const GitHubStrategy = require("passport-github").Strategy;
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
-
+const { uploadFile, getFileStream } = require("../utils/s3");
 
 let currenetUserEmail = "";
 
@@ -111,9 +111,26 @@ router.route("/googleVerification").post((req, res) => {
   });
 });
 
-router.post('/profilePost',upload.single('verificationResulToBackend','profileResulToBackend'),(req,res)=>{
-  console.log(req.body);
-  console.log(req.file)
-})
+router
+  .route("/profilePost")
+  .post(upload.single("profileResulToBackend"), async (req, res) => {
+    let file = req.file;
+    const result = await uploadFile(file);
+   userHelpers.uploadProfile(req.body,result.Location)
+   
+  })
+
+
+router
+  .route('/verificationImageUpload')
+  .post(upload.single("verificationResulToBackend"), async (req, res) => {
+    const file = req.file;
+    const result = await uploadFile(file);
+    userHelpers.uploadVerificationImage(req.body,result.Location)
+  });
+
+ 
+
+
 
 module.exports = router;
