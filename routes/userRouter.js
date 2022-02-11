@@ -16,6 +16,7 @@ const GitHubStrategy = require("passport-github").Strategy;
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const { uploadFile, getFileStream } = require("../utils/s3");
+const fs = require("fs");
 
 let currenetUserEmail = "";
 
@@ -116,21 +117,32 @@ router
   .post(upload.single("profileResulToBackend"), async (req, res) => {
     let file = req.file;
     const result = await uploadFile(file);
-   userHelpers.uploadProfile(req.body,result.Location)
-   
-  })
-
+    if (fs.existsSync("./" + file.path)) {
+      fs.unlink("./" + file.path, function (err) {
+        if (err) throw err;
+        console.log("File deleted!");
+      });
+    }
+    userHelpers.uploadProfile(req.body, result.Location);
+  });
 
 router
-  .route('/verificationImageUpload')
+  .route("/verificationImageUpload")
   .post(upload.single("verificationResulToBackend"), async (req, res) => {
     const file = req.file;
     const result = await uploadFile(file);
-    userHelpers.uploadVerificationImage(req.body,result.Location)
+    if (fs.existsSync("./" + file.path)) {
+      fs.unlink("./" + file.path, function (err) {
+        if (err) throw err;
+        console.log("File deleted!");
+      });
+    }
+    userHelpers
+      .uploadVerificationImage(req.body, result.Location)
+      .then((response) => {
+        res.status(200);
+        res.send(response);
+      });
   });
-
- 
-
-
 
 module.exports = router;
