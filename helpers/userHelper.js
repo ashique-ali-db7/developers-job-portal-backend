@@ -78,8 +78,6 @@ module.exports = {
         .findOne({ email: data.email });
 
       if (user) {
-        console.log("14");
-        console.log(user);
         bcrypt.compare(data.password, user.password).then((status) => {
           if (status) {
             result.token = generateToken(user._id);
@@ -117,30 +115,28 @@ module.exports = {
       }
     });
   },
-  uploadProfile: (allData, imgUrl) => {
-    allData.profileImage = imgUrl;
+  uploadProfile: (allData, profileImgUrl, verificationImgUrl) => {
+      if( profileImgUrl){
+        allData.profileImage = profileImgUrl;
+      }
+      if(verificationImgUrl){
+        allData.verificationImage = verificationImgUrl;
+      }
+     
+     console.log(allData);
+   
 
     return new Promise((resolve, reject) => {
       db.get()
         .collection(collections.USERS_DETAILS_COLLECTION)
-        .updateOne({ _id: objectId(allData.userId) }, { $set: { ...allData } });
-    });
-  },
-  uploadVerificationImage: (allData, imgUrl) => {
-    return new Promise(async (resolve, reject) => {
-      db.get()
-        .collection(collections.USERS_DETAILS_COLLECTION)
-        .updateOne(
-          { _id: objectId(allData.userId) },
-          { $set: { verificationImageUrl: imgUrl } }
-        );
-      let result = await db
-        .get()
-        .collection(collections.USERS_DETAILS_COLLECTION)
-        .findOne({ _id: objectId(allData.userId) });
-      console.log("kkkkkkkk");
-      console.log(result);
-      resolve(result);
+        .updateOne({ _id: objectId(allData.userId) }, { $set: { ...allData } })
+        .then(async () => {
+          let result = await db
+            .get()
+            .collection(collections.USERS_DETAILS_COLLECTION)
+            .findOne({ _id: objectId(allData.userId) });
+          resolve(result);
+        });
     });
   },
 };

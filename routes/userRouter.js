@@ -114,35 +114,45 @@ router.route("/googleVerification").post((req, res) => {
 
 router
   .route("/profilePost")
-  .post(upload.single("profileResulToBackend"), async (req, res) => {
-    let file = req.file;
-    const result = await uploadFile(file);
-    if (fs.existsSync("./" + file.path)) {
-      fs.unlink("./" + file.path, function (err) {
-        if (err) throw err;
-        console.log("File deleted!");
-      });
-    }
-    userHelpers.uploadProfile(req.body, result.Location);
-  });
+  .post(upload.array("profileResulToBackend"), async (req, res) => {
+    let files = req.files;
+    const [profileImage, verificationImageUpload] = files;
 
-router
-  .route("/verificationImageUpload")
-  .post(upload.single("verificationResulToBackend"), async (req, res) => {
-    const file = req.file;
-    const result = await uploadFile(file);
-    if (fs.existsSync("./" + file.path)) {
-      fs.unlink("./" + file.path, function (err) {
-        if (err) throw err;
-        console.log("File deleted!");
+    if (profileImage || verificationImageUpload) {
+      console.log("kk00");
+      const result = await uploadFile(files);
+
+      if (fs.existsSync("./" + profileImage?.path)) {
+        fs.unlink("./" + profileImage.path, function (err) {
+          if (err) throw err;
+          console.log("File deleted!");
+        });
+      }
+
+      if (fs.existsSync("./" + verificationImageUpload?.path)) {
+        fs.unlink("./" + verificationImageUpload.path, function (err) {
+          if (err) throw err;
+          console.log("File deleted!");
+        });
+      }
+      delete req.body.profileResulToBackend;
+      userHelpers
+        .uploadProfile(
+          req.body,
+          result?.profileImage.Location,
+          result.verificationImageUpload?.Location
+        )
+        .then((result) => {
+          res.status(200);
+          res.json(result);
+        });
+    } else {
+      delete req.body.profileResulToBackend;
+      userHelpers.uploadProfile(req.body).then((result) => {
+        res.status(200);
+        res.json(result);
       });
     }
-    userHelpers
-      .uploadVerificationImage(req.body, result.Location)
-      .then((response) => {
-        res.status(200);
-        res.send(response);
-      });
   });
 
 module.exports = router;

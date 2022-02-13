@@ -14,16 +14,30 @@ const s3 = new S3({
 });
 
 //uploads a files to s3
-function uploadFile(file) {
-  console.log("sdsd");
-  console.log(file.filename);
-  const fileStream = fs.createReadStream(file.path);
-  const uploadParams = {
+async function uploadFile(files) {
+  let result = {}
+  const [profileImage,verificationImageUpload] = files;
+  if(profileImage){
+  const fileStreamProfile = fs.createReadStream(profileImage.path);
+  const uploadProfileParams = {
     Bucket: bucketName,
-    Body: fileStream,
-    Key: file.filename,
+    Body: fileStreamProfile,
+    Key: profileImage.filename,
   };
-  return s3.upload(uploadParams).promise();
+  result.profileImage =await s3.upload(uploadProfileParams).promise();
+}
+if(verificationImageUpload){
+  const fileStreamVerification = fs.createReadStream(verificationImageUpload.path);
+  const uploadVerificationParams = {
+    Bucket: bucketName,
+    Body: fileStreamVerification,
+    Key: verificationImageUpload.filename,
+  };
+  result.verificationImageUpload =await s3.upload(uploadVerificationParams).promise();
+}
+
+
+  return result;
 }
 exports.uploadFile = uploadFile;
 
