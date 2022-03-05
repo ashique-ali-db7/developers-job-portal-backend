@@ -8,7 +8,7 @@ const sendEmail = require("../utils/sendEmail");
 const superagent = require("superagent");
 const nodemailer = require("nodemailer");
 const env = require("../config/env");
-const { response } = require("express");
+const { response, Router } = require("express");
 const { jwt_secert } = require("../config/env");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
@@ -21,14 +21,14 @@ const fs = require("fs");
 let currenetUserEmail = "";
 
 function authenthicateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-
-  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN     bearer is a token format
-
-  if (token == null) return res.sendStatus(401);
+  const token = req.headers["authorization"];
+  // const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN  bearer is a token format
+  if (token === null) return res.sendStatus(401);
 
   jwt.verify(token, env.jwt_secert, (err, userid) => {
-    if (err) return res.sendStatus(403);
+    if (err) {
+      return res.sendStatus(403);
+    }
     req.userId = userid;
     next();
   });
@@ -43,6 +43,7 @@ router.route("/signup").post((req, res) => {
       res.status(409);
       res.json({ message: "Entered user already exist" });
     } else {
+      console.log("kkk");
       let transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -50,7 +51,8 @@ router.route("/signup").post((req, res) => {
           pass: env.mailPassword,
         },
       });
-
+      console.log(env.userEmail);
+      console.log(env.mailPassword);
       let mailOptions = {
         from: env.userEmail,
         to: req.body.email,
@@ -119,7 +121,6 @@ router
     const [profileImage, verificationImageUpload] = files;
 
     if (profileImage || verificationImageUpload) {
-      console.log("kk00");
       const result = await uploadFile(files);
 
       if (fs.existsSync("./" + profileImage?.path)) {
@@ -154,5 +155,18 @@ router
       });
     }
   });
-
+router.route("/allUsers").get((req, res) => {
+  userHelpers.allUsers((users) => {
+    res.status(200);
+    res.send(users);
+  },req.query.number);
+});
+router.route("/paginationCount").get((req,res)=>{
+  
+  userHelpers.paginationCount().then((response)=>{
+    console.log(response);
+res.status(200)
+res.json({count:response});
+  })
+})
 module.exports = router;

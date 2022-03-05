@@ -116,16 +116,16 @@ module.exports = {
     });
   },
   uploadProfile: (allData, profileImgUrl, verificationImgUrl) => {
-      if( profileImgUrl){
-        allData.profileImage = profileImgUrl;
-      }
-      if(verificationImgUrl){
-        allData.verificationImage = verificationImgUrl;
-      }
-     
-     console.log(allData);
-   
-
+    console.log("hmm");
+    if (profileImgUrl) {
+      allData.profileImage = profileImgUrl;
+    }
+    if (verificationImgUrl) {
+      allData.verificationImage = verificationImgUrl;
+      allData.status = "Available";
+      allData.earnings = 0;
+    }
+    
     return new Promise((resolve, reject) => {
       db.get()
         .collection(collections.USERS_DETAILS_COLLECTION)
@@ -135,8 +135,27 @@ module.exports = {
             .get()
             .collection(collections.USERS_DETAILS_COLLECTION)
             .findOne({ _id: objectId(allData.userId) });
+          console.log(result);
           resolve(result);
         });
     });
   },
+  allUsers: async (sample,number) => {
+    let skipValue = number - 9
+    let users = await db
+      .get()
+      .collection(collections.USERS_DETAILS_COLLECTION)
+      .find({}).skip(skipValue).limit(Number(number))
+      .toArray();
+      console.log(users);
+    sample(users);
+  },
+  paginationCount:()=>{
+   
+return new Promise(async(resolve,reject)=>{
+  let result =await db.get().collection(collections.USERS_DETAILS_COLLECTION).count();
+
+  resolve(result)
+})
+  }
 };
