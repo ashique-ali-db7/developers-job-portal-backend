@@ -159,14 +159,13 @@ router.route("/allUsers").get((req, res) => {
   userHelpers.allUsers((users) => {
     res.status(200);
     res.send(users);
-  },req.query.number);
+  }, req.query.number);
 });
-router.route("/paginationCount").get((req,res)=>{
-  
-  userHelpers.paginationCount().then((response)=>{
+router.route("/paginationCount").get((req, res) => {
+  userHelpers.paginationCount().then((response) => {
     console.log(response);
-res.status(200)
-res.json({count:response});
-  })
-})
+    res.status(200);
+    res.json({ count: response });
+  });
+});
 module.exports = router;

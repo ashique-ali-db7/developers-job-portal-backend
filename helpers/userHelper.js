@@ -125,7 +125,7 @@ module.exports = {
       allData.status = "Available";
       allData.earnings = 0;
     }
-    
+
     return new Promise((resolve, reject) => {
       db.get()
         .collection(collections.USERS_DETAILS_COLLECTION)
@@ -140,22 +140,26 @@ module.exports = {
         });
     });
   },
-  allUsers: async (sample,number) => {
-    let skipValue = number - 9
+  allUsers: async (sample, number) => {
+    let skipValue = number - 9;
     let users = await db
       .get()
       .collection(collections.USERS_DETAILS_COLLECTION)
-      .find({}).skip(skipValue).limit(Number(number))
+      .find({})
+      .skip(skipValue)
+      .limit(Number(number))
       .toArray();
-      console.log(users);
+    console.log(users);
     sample(users);
   },
-  paginationCount:()=>{
-   
-return new Promise(async(resolve,reject)=>{
-  let result =await db.get().collection(collections.USERS_DETAILS_COLLECTION).count();
+  paginationCount: () => {
+    return new Promise(async (resolve, reject) => {
+      let result = await db
+        .get()
+        .collection(collections.USERS_DETAILS_COLLECTION)
+        .count();
 
-  resolve(result)
-})
-  }
+      resolve(result);
+    });
+  },
 };
